@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz om Stockholms Historia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F8F9FA;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .quiz-container {
+            width: 90%;
+            max-width: 600px;
+            background: #FFFFFF;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            position: relative;
+        }
+
+        .quiz-container h1 {
+            font-size: 1.6em;
+            color: #005a87;
+            margin-bottom: 20px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            height: 15px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #007FC8;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .question-counter {
+            font-size: 1em;
+            color: #007FC8;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .options button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background-color: #007FC8;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .options button:hover {
+            background-color: #004266;
+        }
+
+        .correct {
+            background-color: #4CAF50 !important;
+        }
+
+        .incorrect {
+            background-color: #FF5252 !important;
+        }
+
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .next-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007FC8;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .end-message {
+            display: none;
+            background-color: #f0f8ff;
+            color: #333;
+            border: 1px solid #007FC8;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .end-message h2 {
+            font-size: 1.5em;
+            color: #005a87;
+            margin-bottom: 10px;
+        }
+
+        .end-message p {
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #007FC8;
+        }
+
+        #visitorCount {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.7em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz: Vad vet du om Stockholms historia?</h1>
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <div class="question-counter" id="questionCounter">Fråga 1 av 8</div>
+        <section aria-labelledby="questionLabel">
+            <div class="question" id="questionLabel">Fråga kommer här</div>
+            <div class="options" role="group" aria-labelledby="questionLabel">
+                <button onclick="checkAnswer(0)" aria-label="Alternativ 1">Alternativ 1</button>
+                <button onclick="checkAnswer(1)" aria-label="Alternativ 2">Alternativ 2</button>
+                <button onclick="checkAnswer(2)" aria-label="Alternativ 3">Alternativ 3</button>
+                <button onclick="checkAnswer(3)" aria-label="Alternativ 4">Alternativ 4</button>
+            </div>
+        </section>
+        <div id="result" aria-live="assertive"></div>
+        <button class="next-btn" onclick="nextQuestion()">Nästa fråga</button>
+        <div id="visitorCount">Unika besökare: <span id="uniqueVisitors">0</span></div>
+    </div>
+
+    <div class="end-message" id="endMessage">
+        <button class="close-btn" onclick="closeEndMessage()">×</button>
+        <h2>Tack för din medverkan!</h2>
+        <p id="finalScore"></p>
+        <p>Tack för din medverkan i quizet om Stockholms historia! Oavsett ditt resultat hoppas vi att du haft en givande stund och kanske lärt dig något nytt. Kom gärna tillbaka för att utmana dig själv igen – historien har alltid mer att upptäcka!</p>
+        <p>Vill du börja om? Uppdatera sidan för att starta quizet på nytt.</p>
+    </div>
+
+    <script>
+        const quizData = [
+            { question: "När grundades Stockholm enligt de äldsta kända dokumenten?", options: ["1252", "1452", "1652", "1852"], correct: 0 },
+            { question: "Vilket namn har Stockholms första bro, som byggdes på 1200-talet?", options: ["Klara bron", "Riksbron", "Norrbro", "Stadsholmsbron"], correct: 3 },
+            { question: "Vad hette epidemin som drabbade Stockholm hårt år 1710 och ledde till tusentals dödsfall?", options: ["Kolera", "Pest", "Smittkoppor", "Spanska sjukan"], correct: 1 },
+            { question: "Vilken byggnad började byggas år 1697 efter en stor brand förstört det tidigare slottet Tre Kronor?", options: ["Riddarhuset", "Kungliga Operan", "Stockholms slott", "Storkyrkan"], correct: 2 },
+            { question: "Vilket år invigdes den första tunnelbanelinjen i Stockholm?", options: ["1945", "1950", "1960", "1970"], correct: 1 },
+            { question: "Vilken kung grundade Stockholm?", options: ["Gustav Vasa", "Birger Jarl", "Karl XII", "Erik XIV"], correct: 1 },
+            { question: "Vad kallas Stockholms stadshus mest berömda sal?", options: ["Gyllene salen", "Blå hallen", "Riddarsalen", "Stora salen"], correct: 1 },
+            { question: "Vilken ö kallas ofta för \"Stockholms hjärta\" och är en del av Gamla stan?", options: ["Södermalm", "Djurgården", "Stadsholmen", "Kungsholmen"], correct: 2 }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        const totalQuestions = quizData.length;
+
+        function loadQuestion() {
+            document.getElementById("questionLabel").innerText = quizData[currentQuestion].question;
+            document.getElementById("questionCounter").innerText = `Fråga ${currentQuestion + 1} av ${totalQuestions}`;
+            document.getElementById("progressBarFill").style.width = `${(currentQuestion / totalQuestions) * 100}%`;
+            
+            const options = document.querySelectorAll(".options button");
+            options.forEach((button, index) => {
+                button.innerText = quizData[currentQuestion].options[index];
+                button.classList.remove("correct", "incorrect");
+                button.disabled = false;
+            });
+            document.getElementById("result").innerText = "";
+            document.querySelector(".next-btn").style.display = "none";
+        }
+
+        function checkAnswer(selected) {
+            const options = document.querySelectorAll(".options button");
+            options.forEach(button => button.disabled = true);
+            if (selected === quizData[currentQuestion].correct) {
+                score++;
+                document.getElementById("result").innerText = "Rätt svar! Bra jobbat!";
+                options[selected].classList.add("correct");
+            } else {
+                document.getElementById("result").innerText = `Nästan rätt! Rätt svar är: ${quizData[currentQuestion].options[quizData[currentQuestion].correct]}. Prova gärna igen.`;
+                options[selected].classList.add("incorrect");
+                options[quizData[currentQuestion].correct].classList.add("correct");
+            }
+            document.querySelector(".next-btn").style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < totalQuestions) {
+                loadQuestion();
+            } else {
+                showEndMessage();
+            }
+        }
+
+        function showEndMessage() {
+            document.querySelector(".quiz-container").style.display = "none";
+            document.getElementById("endMessage").style.display = "block";
+            const percentCorrect = ((score / totalQuestions) * 100).toFixed(1);
+            let feedback;
+            if (percentCorrect >= 80) {
+                feedback = "Bra jobbat, du kan Stockholms historia riktigt bra!";
+            } else if (percentCorrect >= 50) {
+                feedback = "Bra försök! Du har god koll på Stockholms historia.";
+            } else {
+                feedback = "Tack för att du deltog! Fortsätt utforska Stockholms historia!";
+            }
+            document.getElementById("finalScore").innerText = `Du fick ${score} av ${totalQuestions} poäng (${percentCorrect}%)! ${feedback}`;
+        }
+
+        function closeEndMessage() {
+            document.getElementById("endMessage").style.display = "none";
+        }
+
+        function updateVisitorCount() {
+            if (!localStorage.getItem("visited")) {
+                let visitorCount = parseInt(localStorage.getItem("visitorCount") || "0");
+                visitorCount += 1;
+                localStorage.setItem("visitorCount", visitorCount);
+                localStorage.setItem("visited", "true");
+            }
+            document.getElementById("uniqueVisitors").innerText = localStorage.getItem("visitorCount");
+        }
+
+        loadQuestion();
+        updateVisitorCount();
+    </script>
+</body>
+</html>
